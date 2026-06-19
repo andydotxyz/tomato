@@ -3,3 +3,5 @@ ID = "xyz.andy.fomato"
 Name = "Fomato"
 Version = "0.1"
 
+[LinuxAndBSD]
+Categories = ["Utility"]

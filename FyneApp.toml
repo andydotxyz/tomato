@@ -5,3 +5,6 @@ Version = "0.1"
 
 [LinuxAndBSD]
 Categories = ["Utility"]
+
+[Migrations]
+fyneDo = true

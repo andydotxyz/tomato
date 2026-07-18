@@ -1,5 +1,17 @@
 package main
 
+/*
+#cgo CFLAGS: -x objective-c
+#cgo LDFLAGS: -framework Cocoa
+#import <Cocoa/Cocoa.h>
+
+int
+SetActivationPolicy(void) {
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
+    return 0;
+}
+*/
+import "C"
 import (
 	"fmt"
 	"strings"
@@ -23,11 +35,20 @@ const (
 	keyTimerLength = "focus.default"
 )
 
+func setActivationPolicy() {
+	fmt.Println("Setting ActivationPolicy")
+	C.SetActivationPolicy()
+}
+
 var running = binding.NewBool()
 
 func main() {
 	a := app.New()
 	setupChime()
+
+	//	a.Lifecycle().SetOnStarted(func() {
+	setActivationPolicy()
+	//	})
 
 	a.Settings().SetTheme(&appTheme{Theme: theme.DefaultTheme()})
 	w := a.NewWindow("Fomato Timer")
@@ -52,7 +73,8 @@ func main() {
 		})
 		menu := fyne.NewMenu(a.Metadata().Name, show, fyne.NewMenuItemSeparator(), focus, slack)
 		desk.SetSystemTrayMenu(menu)
-
+		desk.SetSystemTrayWindow(w)
+	
 		running.AddListener(binding.NewDataListener(func() {
 			busy, _ := running.Get()
 			focus.Disabled = busy
@@ -96,7 +118,7 @@ func main() {
 		bg,
 		container.NewPadded(container.NewPadded(content))))
 	w.Resize(fyne.NewSquareSize(content.MinSize().Width + theme.Padding()*4))
-	w.ShowAndRun()
+	a.Run()
 }
 
 func formatTimer(time int) string {
@@ -141,16 +163,19 @@ func startTimer(remain int, name string, c fyne.Canvas) {
 	}
 	go func() {
 		for remain > 0 {
+			fyne.Do(func() {
 			updateTime(ticker, remain)
 			if _, ok := fyne.CurrentApp().(desktop.App); ok {
 				systray.SetTitle(formatTimer(remain))
 			}
 
 			remain--
+			})
 			time.Sleep(time.Second)
 		}
 
 		running.Set(false)
+		fyne.Do(func() {
 		if remain == 0 {
 			fyne.CurrentApp().SendNotification(fyne.NewNotification(name+" done",
 				"Your "+strings.ToLower(name)+" timer finished"))
@@ -161,6 +186,7 @@ func startTimer(remain int, name string, c fyne.Canvas) {
 			systray.SetTitle("")
 		}
 		p.Hide()
+		})
 	}()
 	p.Show()
 }

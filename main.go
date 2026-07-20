@@ -1,17 +1,5 @@
 package main
 
-/*
-#cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -framework Cocoa
-#import <Cocoa/Cocoa.h>
-
-int
-SetActivationPolicy(void) {
-    [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
-    return 0;
-}
-*/
-import "C"
 import (
 	"fmt"
 	"strings"
@@ -34,11 +22,6 @@ const (
 
 	keyTimerLength = "focus.default"
 )
-
-func setActivationPolicy() {
-	fmt.Println("Setting ActivationPolicy")
-	C.SetActivationPolicy()
-}
 
 var running = binding.NewBool()
 
